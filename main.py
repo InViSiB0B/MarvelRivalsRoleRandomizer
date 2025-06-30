@@ -1,28 +1,45 @@
 import random
 import pygame
 import os
+import sys
 from typing import List, Dict
 
 
-class MarvelRivalsRandomizer:
+def get_resource_path(relative_path):
+    """Get absolute path to resource, works for dev and for PyInstaller"""
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
+
+class MarvelRivalsRoleRandomizer:
     def __init__(self):
         self.players = []
         self.roles = ["Vanguard", "Duelist", "Strategist"]
 
         # Initialize pygame mixer for sound
         pygame.mixer.init()
-        self.sound_file = "again.mp3"
+        self.sound_file = "again.mp3"  # Primary path (for development)
+        self.sound_file_fallback = get_resource_path("again.mp3")  # Fallback (for exe)
 
     def play_sound(self):
         """Play the randomize sound effect"""
         try:
+            # Try the primary path first (development environment)
             if os.path.exists(self.sound_file):
                 pygame.mixer.music.load(self.sound_file)
                 pygame.mixer.music.play()
+            # If that fails, try the PyInstaller bundled path
+            elif os.path.exists(self.sound_file_fallback):
+                pygame.mixer.music.load(self.sound_file_fallback)
+                pygame.mixer.music.play()
             else:
-                print(f"Sound file '{self.sound_file}' not found!")
+                print(f"Sound file not found in either location!")
         except Exception as e:
             print(f"Could not play sound: {e}")
+
 
     def add_players(self, player_names: List[str]):
         """Add player names to the game"""
@@ -85,7 +102,7 @@ class MarvelRivalsRandomizer:
         print("\n" + "="*50)
 
 def main():
-    randomizer = MarvelRivalsRandomizer()
+    randomizer = MarvelRivalsRoleRandomizer()
 
     print ("Welcome to Marvel Rivals Role Randomizer!")
     print ("Enter the names of all players:")
